@@ -55,6 +55,10 @@ module.exports = exports = class Thread {
     this._thread.resume()
   }
 
+  terminate() {
+    this._thread.terminate()
+  }
+
   [Symbol.for('bare.inspect')]() {
     return {
       __proto__: { constructor: Thread },
