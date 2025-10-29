@@ -51,7 +51,7 @@ exports.isMainThread = Bare.Thread.isMainThread
 
 exports.self = Bare.Thread.self
 
-exports.prepare = function prepare(entry) {
+exports.prepare = function prepare(entry, opts) {
   if (startsWithWindowsDriveLetter(entry)) entry = '/' + entry
 
   entry = new URL(entry, module.url)
@@ -75,7 +75,7 @@ exports.prepare = function prepare(entry) {
     })
   }
 
-  return bundle.toBuffer()
+  return bundle.toBuffer(opts)
 }
 
 function readModule(url) {
