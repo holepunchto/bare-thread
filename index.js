@@ -9,7 +9,7 @@ module.exports = exports = class Thread {
     let source
 
     if (Buffer.isBuffer(entry)) source = entry
-    else source = Thread.prepare(entry)
+    else source = Thread.prepare(entry, { shared: true })
 
     this._thread = new Bare.Thread('bare:/thread.bundle', { ...opts, source })
   }
