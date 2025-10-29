@@ -5,28 +5,12 @@ const { imports, resolutions, protocol } = module
 
 module.exports = exports = class Thread {
   constructor(entry, opts = {}) {
-    entry = new URL(entry, module.url)
+    let source
 
-    const bundle = new Bundle()
+    if (Buffer.isBuffer(entry)) source = entry
+    else source = Thread.prepare(entry)
 
-    for (const dependency of traverse(
-      entry,
-      {
-        imports,
-        resolutions,
-        resolve: traverse.resolve.bare
-      },
-      readModule
-    )) {
-      const { url, source, imports } = dependency
-
-      bundle.write(url.href, source, {
-        main: url.href === entry.href,
-        imports
-      })
-    }
-
-    this._thread = new Bare.Thread('bare:/thread.bundle', { ...opts, source: bundle.toBuffer() })
+    this._thread = new Bare.Thread('bare:/thread.bundle', { ...opts, source })
   }
 
   get joined() {
@@ -65,6 +49,31 @@ module.exports = exports = class Thread {
 exports.isMainThread = Bare.Thread.isMainThread
 
 exports.self = Bare.Thread.self
+
+exports.prepare = function prepare(entry) {
+  entry = new URL(entry, module.url)
+
+  const bundle = new Bundle()
+
+  for (const dependency of traverse(
+    entry,
+    {
+      imports,
+      resolutions,
+      resolve: traverse.resolve.bare
+    },
+    readModule
+  )) {
+    const { url, source, imports } = dependency
+
+    bundle.write(url.href, source, {
+      main: url.href === entry.href,
+      imports
+    })
+  }
+
+  return bundle.toBuffer()
+}
 
 function readModule(url) {
   if (protocol.exists(url)) return protocol.read(url)
