@@ -27,12 +27,6 @@ module.exports = exports = class Thread {
     }
 
     this._thread = new Bare.Thread('bare:/thread.bundle', { ...opts, source: bundle.toBuffer() })
-
-    function readModule(url) {
-      if (protocol.exists(url)) return protocol.read(url)
-
-      return null
-    }
   }
 
   get joined() {
@@ -71,3 +65,9 @@ module.exports = exports = class Thread {
 exports.isMainThread = Bare.Thread.isMainThread
 
 exports.self = Bare.Thread.self
+
+function readModule(url) {
+  if (protocol.exists(url)) return protocol.read(url)
+
+  return null
+}
