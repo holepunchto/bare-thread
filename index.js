@@ -1,5 +1,6 @@
 const Bundle = require('bare-bundle')
 const traverse = require('bare-module-traverse')
+const { startsWithWindowsDriveLetter } = require('bare-module-resolve')
 
 const { imports, resolutions, protocol } = module
 
@@ -51,6 +52,8 @@ exports.isMainThread = Bare.Thread.isMainThread
 exports.self = Bare.Thread.self
 
 exports.prepare = function prepare(entry) {
+  if (startsWithWindowsDriveLetter(entry)) entry = '/' + entry
+
   entry = new URL(entry, module.url)
 
   const bundle = new Bundle()

@@ -24,6 +24,7 @@
   "homepage": "https://github.com/holepunchto/bare-thread#readme",
   "dependencies": {
     "bare-bundle": "^1.9.0",
+    "bare-module-resolve": "^1.11.2",
     "bare-module-traverse": "^1.7.2"
   },
   "devDependencies": {
