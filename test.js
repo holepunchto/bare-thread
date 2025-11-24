@@ -6,3 +6,9 @@ test('basic', (t) => {
   thread.join()
   t.pass()
 })
+
+test.solo('nested', (t) => {
+  const thread = new Thread(require.resolve('./test/fixtures/nested/a.js'))
+  thread.join()
+  t.pass()
+})
