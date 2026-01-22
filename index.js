@@ -2,7 +2,7 @@ const Bundle = require('bare-bundle')
 const traverse = require('bare-module-traverse')
 const { startsWithWindowsDriveLetter } = require('bare-module-resolve')
 
-const { protocol, conditions, imports, resolutions } = module
+const { protocol, imports, resolutions } = module
 
 module.exports = exports = class Thread {
   constructor(entry, opts = {}) {
@@ -61,7 +61,6 @@ exports.prepare = function prepare(entry, opts) {
   for (const dependency of traverse(
     entry,
     {
-      conditions,
       imports,
       resolutions,
       resolve: traverse.resolve.bare
