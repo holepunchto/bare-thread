@@ -1,6 +1,7 @@
 const Bundle = require('bare-bundle')
 const traverse = require('bare-module-traverse')
 const { startsWithWindowsDriveLetter } = require('bare-module-resolve')
+const binding = require('./binding')
 
 const { protocol, imports, resolutions } = module
 
@@ -50,6 +51,8 @@ module.exports = exports = class Thread {
 exports.isMainThread = Bare.Thread.isMainThread
 
 exports.self = Bare.Thread.self
+
+exports.getThreadCPU = binding.getThreadCPU
 
 exports.prepare = function prepare(entry, opts) {
   if (startsWithWindowsDriveLetter(entry)) entry = '/' + entry

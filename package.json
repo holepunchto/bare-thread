@@ -7,8 +7,13 @@
     ".": "./index.js"
   },
   "files": [
-    "index.js"
+    "index.js",
+    "binding.c",
+    "binding.js",
+    "CMakeLists.txt",
+    "prebuilds"
   ],
+  "addon": true,
   "scripts": {
     "test": "prettier . --check && bare test.js"
   },
@@ -29,7 +34,9 @@
   },
   "devDependencies": {
     "brittle": "^3.3.2",
+    "cmake-bare": "^1.7.6",
     "prettier": "^3.4.2",
-    "prettier-config-holepunch": "^2.0.0"
+    "prettier-config-holepunch": "^2.0.0",
+    "which-runtime": "^1.3.2"
   }
 }
