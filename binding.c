@@ -34,7 +34,9 @@ bare_thread_get_name(js_env_t *env, js_callback_info_t *info) {
   char name[256];
   err = uv_thread_getname(&thread, name, 256);
   if (err < 0) {
-    js_throw_error(env, uv_err_name(err), uv_strerror(err));
+    err = js_throw_error(env, uv_err_name(err), uv_strerror(err));
+    assert(err == 0);
+
     return NULL;
   }
 
@@ -63,7 +65,9 @@ bare_thread_set_name(js_env_t *env, js_callback_info_t *info) {
 
   err = uv_thread_setname((char *) data);
   if (err < 0) {
-    js_throw_error(env, uv_err_name(err), uv_strerror(err));
+    err = js_throw_error(env, uv_err_name(err), uv_strerror(err));
+    assert(err == 0);
+
     return NULL;
   }
 
