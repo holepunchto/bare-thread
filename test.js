@@ -19,9 +19,10 @@ test('Thread.cpu', (t) => {
 
 test('name property', (t) => {
   const thread = new Thread(require.resolve('./test/fixtures/basic/index.js'))
-  thread.join()
 
   thread.name = 'bare-test'
 
   t.is(thread.name, 'bare-test')
+
+  thread.join()
 })
