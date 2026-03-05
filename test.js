@@ -16,3 +16,13 @@ test('nested', (t) => {
 test('Thread.cpu', (t) => {
   t.comment(Thread.cpu)
 })
+
+test('name property', (t) => {
+  const thread = new Thread(require.resolve('./test/fixtures/basic/index.js'))
+
+  thread.name = 'bare-test'
+
+  t.is(thread.name, 'bare-test')
+
+  thread.join()
+})

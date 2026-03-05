@@ -19,6 +19,16 @@ module.exports = exports = class Thread {
     return this._thread.joined
   }
 
+  get name() {
+    return binding.getName()
+  }
+
+  set name(name) {
+    if (typeof name !== 'string') name = name.toString()
+
+    binding.setName(name)
+  }
+
   join() {
     this._thread.join()
   }
