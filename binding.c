@@ -1,12 +1,16 @@
 #include <assert.h>
 #include <bare.h>
 #include <js.h>
+#include <uv.h>
 
 static js_value_t *
-bare_thread_getcpu(js_env_t *env, js_callback_info_t *info) {
+bare_thread_get_cpu(js_env_t *env, js_callback_info_t *info) {
   int err;
 
   int cpu = uv_thread_getcpu();
+
+  if (cpu == UV_ENOTSUP) return NULL;
+
   if (cpu < 0) {
     err = js_throw_error(env, uv_err_name(cpu), uv_strerror(cpu));
     assert(err == 0);
@@ -34,7 +38,7 @@ bare_thread_exports(js_env_t *env, js_value_t *exports) {
     assert(err == 0); \
   }
 
-  V("getThreadCPU", bare_thread_getcpu)
+  V("getCPU", bare_thread_get_cpu)
 #undef V
 
   return exports;

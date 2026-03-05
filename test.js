@@ -1,5 +1,4 @@
 const test = require('brittle')
-const { isMac } = require('which-runtime')
 const Thread = require('.')
 
 test('basic', (t) => {
@@ -14,10 +13,6 @@ test('nested', (t) => {
   t.pass()
 })
 
-test('getThreadCPU', (t) => {
-  if (isMac) {
-    t.exception(() => Thread.getThreadCPU())
-  } else {
-    t.comment(Thread.getThreadCPU())
-  }
+test('Thread.cpu', (t) => {
+  t.comment(Thread.cpu)
 })

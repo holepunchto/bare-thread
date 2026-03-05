@@ -46,6 +46,10 @@ module.exports = exports = class Thread {
       joined: this.joined
     }
   }
+
+  static get cpu() {
+    return binding.getCPU()
+  }
 }
 
 exports.isMainThread = Bare.Thread.isMainThread

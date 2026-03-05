@@ -36,7 +36,6 @@
     "brittle": "^3.3.2",
     "cmake-bare": "^1.7.6",
     "prettier": "^3.4.2",
-    "prettier-config-holepunch": "^2.0.0",
-    "which-runtime": "^1.3.2"
+    "prettier-config-holepunch": "^2.0.0"
   }
 }
