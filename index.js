@@ -1,6 +1,7 @@
 const Bundle = require('bare-bundle')
 const traverse = require('bare-module-traverse')
 const { startsWithWindowsDriveLetter } = require('bare-module-resolve')
+const binding = require('./binding')
 
 const { protocol, imports, resolutions } = module
 
@@ -44,6 +45,10 @@ module.exports = exports = class Thread {
 
       joined: this.joined
     }
+  }
+
+  static get cpu() {
+    return binding.getCPU()
   }
 }
 

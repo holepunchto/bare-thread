@@ -12,3 +12,7 @@ test('nested', (t) => {
   thread.join()
   t.pass()
 })
+
+test('Thread.cpu', (t) => {
+  t.comment(Thread.cpu)
+})
