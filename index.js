@@ -56,8 +56,6 @@ exports.isMainThread = Bare.Thread.isMainThread
 
 exports.self = Bare.Thread.self
 
-exports.getThreadCPU = binding.getThreadCPU
-
 exports.prepare = function prepare(entry, opts) {
   if (startsWithWindowsDriveLetter(entry)) entry = '/' + entry
 
