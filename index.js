@@ -2,6 +2,7 @@ const Bundle = require('bare-bundle')
 const traverse = require('bare-module-traverse')
 const { startsWithWindowsDriveLetter } = require('bare-module-resolve')
 const binding = require('./binding')
+const errors = require('./lib/errors')
 
 const { protocol, imports, resolutions } = module
 
@@ -17,6 +18,20 @@ module.exports = exports = class Thread {
 
   get joined() {
     return this._thread.joined
+  }
+
+  get name() {
+    return binding.getName()
+  }
+
+  set name(name) {
+    if (typeof name !== 'string') name = name.toString()
+
+    if (name.length >= 256) {
+      throw errors.NAME_OVERFLOW('Thread name is too long')
+    }
+
+    binding.setName(name)
   }
 
   join() {

@@ -26,6 +26,51 @@ bare_thread_get_cpu(js_env_t *env, js_callback_info_t *info) {
 }
 
 static js_value_t *
+bare_thread_get_name(js_env_t *env, js_callback_info_t *info) {
+  int err;
+
+  uv_thread_t thread = uv_thread_self();
+
+  char name[256];
+  err = uv_thread_getname(&thread, name, 256);
+  if (err < 0) {
+    js_throw_error(env, uv_err_name(err), uv_strerror(err));
+    return NULL;
+  }
+
+  js_value_t *result;
+  err = js_create_string_utf8(env, (utf8_t *) name, -1, &result);
+  assert(err == 0);
+
+  return result;
+}
+
+static js_value_t *
+bare_thread_set_name(js_env_t *env, js_callback_info_t *info) {
+  int err;
+
+  size_t argc = 1;
+  js_value_t *argv[1];
+
+  err = js_get_callback_info(env, info, &argc, argv, NULL, NULL);
+  assert(err == 0);
+
+  assert(argc == 1);
+
+  utf8_t data[256];
+  err = js_get_value_string_utf8(env, argv[0], data, 256, NULL);
+  assert(err == 0);
+
+  err = uv_thread_setname((char *) data);
+  if (err < 0) {
+    js_throw_error(env, uv_err_name(err), uv_strerror(err));
+    return NULL;
+  }
+
+  return NULL;
+}
+
+static js_value_t *
 bare_thread_exports(js_env_t *env, js_value_t *exports) {
   int err;
 
@@ -39,6 +84,8 @@ bare_thread_exports(js_env_t *env, js_value_t *exports) {
   }
 
   V("getCPU", bare_thread_get_cpu)
+  V("getName", bare_thread_get_name)
+  V("setName", bare_thread_set_name)
 #undef V
 
   return exports;
