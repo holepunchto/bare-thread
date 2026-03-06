@@ -26,3 +26,15 @@ test('name property', (t) => {
 
   thread.join()
 })
+
+test('priority', (t) => {
+  const thread = new Thread(require.resolve('./test/fixtures/basic/index.js'))
+
+  const defaultPriority = thread.priority
+
+  thread.priority = Thread.constants.priority.PRIORITY_BELOW_NORMAL
+
+  t.ok(thread.priority !== defaultPriority)
+
+  thread.join()
+})
