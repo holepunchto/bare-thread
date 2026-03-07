@@ -1,6 +1,7 @@
 const Bundle = require('bare-bundle')
 const traverse = require('bare-module-traverse')
 const { startsWithWindowsDriveLetter } = require('bare-module-resolve')
+const constants = require('./lib/constants')
 const binding = require('./binding')
 
 const { protocol, imports, resolutions } = module
@@ -27,6 +28,14 @@ module.exports = exports = class Thread {
     if (typeof name !== 'string') name = name.toString()
 
     binding.setName(name)
+  }
+
+  get priority() {
+    return binding.getPriority()
+  }
+
+  set priority(priority) {
+    binding.setPriority(priority)
   }
 
   join() {
@@ -98,3 +107,5 @@ function readModule(url) {
 
   return null
 }
+
+exports.constants = constants
