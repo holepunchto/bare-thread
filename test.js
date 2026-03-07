@@ -1,4 +1,5 @@
 const test = require('brittle')
+const Bundle = require('bare-bundle')
 const Thread = require('.')
 
 test('basic', (t) => {
@@ -9,6 +10,13 @@ test('basic', (t) => {
 
 test('nested', (t) => {
   const thread = new Thread(require.resolve('./test/fixtures/nested/a.js'))
+  thread.join()
+  t.pass()
+})
+
+test('from buffer', (t) => {
+  const bundle = new Bundle().write('/index.js', "console.log('Hello world')", { main: true })
+  const thread = new Thread(bundle.toBuffer())
   thread.join()
   t.pass()
 })
