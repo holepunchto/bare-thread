@@ -69,6 +69,10 @@ module.exports = exports = class Thread {
   static get cpu() {
     return binding.getCPU()
   }
+
+  static get id() {
+    return binding.getID()
+  }
 }
 
 exports.isMainThread = Bare.Thread.isMainThread

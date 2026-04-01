@@ -46,3 +46,7 @@ test('priority', (t) => {
 
   thread.join()
 })
+
+test('Thread.id', (t) => {
+  t.comment(Thread.id)
+})
