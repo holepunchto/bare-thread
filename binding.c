@@ -1,7 +1,15 @@
+#if defined(__linux__)
+#define _GNU_SOURCE
+#endif
+
 #include <assert.h>
 #include <bare.h>
 #include <js.h>
 #include <uv.h>
+
+#if defined(__linux__)
+#include <unistd.h>
+#endif
 
 static js_value_t *
 bare_thread_get_cpu(js_env_t *env, js_callback_info_t *info) {
@@ -29,10 +37,20 @@ static js_value_t *
 bare_thread_get_id(js_env_t *env, js_callback_info_t *info) {
   int err;
 
-  uv_thread_t thread = uv_thread_self();
+  uint64_t id;
+
+#if defined(__APPLE__)
+  pthread_threadid_np(pthread_self(), &id);
+#elif defined(__linux__)
+  id = (uint64_t) gettid();
+#elif defined(_WIN32)
+  id = (uint64_t) GetCurrentThreadId();
+#else
+  id = (uint64_t) (uintptr_t) uv_thread_self() & 0x1fffffffffffffull;
+#endif
 
   js_value_t *result;
-  err = js_create_int64(env, (int64_t) (uintptr_t) thread, &result);
+  err = js_create_int64(env, id, &result);
   assert(err == 0);
 
   return result;
