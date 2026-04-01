@@ -26,6 +26,19 @@ bare_thread_get_cpu(js_env_t *env, js_callback_info_t *info) {
 }
 
 static js_value_t *
+bare_thread_get_id(js_env_t *env, js_callback_info_t *info) {
+  int err;
+
+  uv_thread_t thread = uv_thread_self();
+
+  js_value_t *result;
+  err = js_create_int64(env, (int64_t) (uintptr_t) thread, &result);
+  assert(err == 0);
+
+  return result;
+}
+
+static js_value_t *
 bare_thread_get_name(js_env_t *env, js_callback_info_t *info) {
   int err;
 
@@ -139,6 +152,7 @@ bare_thread_exports(js_env_t *env, js_value_t *exports) {
   }
 
   V("getCPU", bare_thread_get_cpu)
+  V("getID", bare_thread_get_id)
   V("getName", bare_thread_get_name)
   V("setName", bare_thread_set_name)
   V("getPriority", bare_thread_get_priority)
