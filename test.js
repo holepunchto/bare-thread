@@ -47,6 +47,14 @@ test('priority', (t) => {
   thread.join()
 })
 
+test.solo('affinity', (t) => {
+  const thread = new Thread(require.resolve('./test/fixtures/basic/index.js'))
+
+  t.comment(thread.affinity)
+
+  thread.join()
+})
+
 test('Thread.id', (t) => {
   t.comment(Thread.id)
 })

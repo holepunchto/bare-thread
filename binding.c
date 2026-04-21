@@ -157,6 +157,24 @@ bare_thread_set_priority(js_env_t *env, js_callback_info_t *info) {
 }
 
 static js_value_t *
+bare_thread_get_affinity(js_env_t *env, js_callback_info_t *info) {
+  int err;
+
+  uv_thread_t thread = uv_thread_self();
+
+  char *affinity;
+  err = uv_thread_getaffinity(&thread, affinity, uv_cpumask_size());
+  if (err < 0) {
+    err = js_throw_error(env, uv_err_name(err), uv_strerror(err));
+    assert(err == 0);
+
+    return NULL;
+  }
+
+  return NULL;
+}
+
+static js_value_t *
 bare_thread_exports(js_env_t *env, js_value_t *exports) {
   int err;
 
@@ -175,6 +193,7 @@ bare_thread_exports(js_env_t *env, js_value_t *exports) {
   V("setName", bare_thread_set_name)
   V("getPriority", bare_thread_get_priority)
   V("setPriority", bare_thread_set_priority)
+  V("getAffinity", bare_thread_get_affinity)
 #undef V
 
   js_value_t *priority;

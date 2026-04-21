@@ -38,6 +38,10 @@ module.exports = exports = class Thread {
     binding.setPriority(priority)
   }
 
+  get affinity() {
+    return binding.getAffinity()
+  }
+
   join() {
     this._thread.join()
   }
