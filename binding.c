@@ -157,6 +157,100 @@ bare_thread_set_priority(js_env_t *env, js_callback_info_t *info) {
 }
 
 static js_value_t *
+bare_thread_create_key(js_env_t *env, js_callback_info_t *info) {
+  int err;
+
+  js_value_t *handle;
+
+  uv_key_t *key;
+  err = js_create_arraybuffer(env, sizeof(uv_key_t), (void **) &key, &handle);
+  assert(err == 0);
+
+  err = uv_key_create(key);
+
+  if (err < 0) {
+    err = js_throw_error(env, uv_err_name(err), uv_strerror(err));
+    assert(err == 0);
+
+    return NULL;
+  }
+
+  return handle;
+}
+
+static js_value_t *
+bare_thread_delete_key(js_env_t *env, js_callback_info_t *info) {
+  int err;
+
+  size_t argc = 1;
+  js_value_t *argv[1];
+
+  err = js_get_callback_info(env, info, &argc, argv, NULL, NULL);
+  assert(err == 0);
+
+  assert(argc == 1);
+
+  uv_key_t *key;
+  err = js_get_arraybuffer_info(env, argv[0], (void **) &key, NULL);
+  assert(err == 0);
+
+  err = js_delete_reference(env, uv_key_get(key));
+  assert(err == 0);
+
+  uv_key_delete(key);
+
+  return NULL;
+}
+
+static js_value_t *
+bare_thread_get_key(js_env_t *env, js_callback_info_t *info) {
+  int err;
+
+  size_t argc = 1;
+  js_value_t *argv[1];
+
+  err = js_get_callback_info(env, info, &argc, argv, NULL, NULL);
+  assert(err == 0);
+
+  assert(argc == 1);
+
+  uv_key_t *key;
+  err = js_get_arraybuffer_info(env, argv[0], (void **) &key, NULL);
+  assert(err == 0);
+
+  js_value_t *value;
+  err = js_get_reference_value(env, uv_key_get(key), &value);
+  assert(err == 0);
+
+  return value;
+}
+
+static js_value_t *
+bare_thread_set_key(js_env_t *env, js_callback_info_t *info) {
+  int err;
+
+  size_t argc = 2;
+  js_value_t *argv[2];
+
+  err = js_get_callback_info(env, info, &argc, argv, NULL, NULL);
+  assert(err == 0);
+
+  assert(argc == 2);
+
+  uv_key_t *key;
+  err = js_get_arraybuffer_info(env, argv[0], (void **) &key, NULL);
+  assert(err == 0);
+
+  js_ref_t *ref;
+  err = js_create_reference(env, argv[1], 0, &ref);
+  assert(err == 0);
+
+  uv_key_set(key, ref);
+
+  return NULL;
+}
+
+static js_value_t *
 bare_thread_exports(js_env_t *env, js_value_t *exports) {
   int err;
 
@@ -175,6 +269,10 @@ bare_thread_exports(js_env_t *env, js_value_t *exports) {
   V("setName", bare_thread_set_name)
   V("getPriority", bare_thread_get_priority)
   V("setPriority", bare_thread_set_priority)
+  V("createKey", bare_thread_create_key)
+  V("deleteKey", bare_thread_delete_key)
+  V("getKey", bare_thread_get_key)
+  V("setKey", bare_thread_set_key)
 #undef V
 
   js_value_t *priority;

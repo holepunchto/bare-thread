@@ -14,6 +14,7 @@ module.exports = exports = class Thread {
     else source = Thread.prepare(entry, { shared: true })
 
     this._thread = new Bare.Thread('bare:/thread.bundle', { ...opts, source })
+    this._keys = new Map()
   }
 
   get joined() {
@@ -36,6 +37,31 @@ module.exports = exports = class Thread {
 
   set priority(priority) {
     binding.setPriority(priority)
+  }
+
+  getKey(key) {
+    if (!this._keys.has(key)) return undefined
+
+    const threadKey = this._keys.get(key)
+    return binding.getKey(threadKey)
+  }
+
+  setKey(key, value) {
+    if (this._keys.has(key)) {
+      binding.setKey(this._keys.get(key), value)
+    } else {
+      const threadKey = binding.createKey()
+      binding.setKey(threadKey, value)
+      this._keys.set(key, threadKey)
+    }
+  }
+
+  deleteKey(key) {
+    if (!this._keys.has(key)) return
+
+    const threadKey = this._keys.get(key)
+    binding.deleteKey(threadKey)
+    this._keys.delete(key)
   }
 
   join() {

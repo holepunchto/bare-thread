@@ -47,6 +47,21 @@ test('priority', (t) => {
   thread.join()
 })
 
+test('thread-local storage', (t) => {
+  const thread = new Thread(require.resolve('./test/fixtures/basic/index.js'))
+
+  thread.setKey('foo', 'bar')
+  t.is(thread.getKey('foo'), 'bar')
+
+  thread.setKey('foo', 'baz')
+  t.is(thread.getKey('foo'), 'baz')
+
+  thread.deleteKey('foo')
+  t.is(thread.getKey('foo'), undefined)
+
+  thread.join()
+})
+
 test('Thread.id', (t) => {
   t.comment(Thread.id)
 })
