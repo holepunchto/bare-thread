@@ -104,6 +104,8 @@ exports.prepare = function prepare(entry, opts) {
     })
   }
 
+  if (imports !== null) bundle.imports = imports
+
   return bundle.toBuffer(opts)
 }
 
