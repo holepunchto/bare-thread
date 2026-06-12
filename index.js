@@ -108,7 +108,15 @@ exports.prepare = function prepare(entry, opts) {
 }
 
 function readModule(url) {
-  if (protocol.exists(url)) return protocol.read(url)
+  const candidates = [url]
+
+  if (url.protocol === 'file:') {
+    candidates.push(new URL(url.pathname, module.url))
+  }
+
+  for (const candidate of candidates) {
+    if (protocol.exists(candidate)) return protocol.read(candidate)
+  }
 
   return null
 }
