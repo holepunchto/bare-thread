@@ -83,7 +83,21 @@ exports.self = Bare.Thread.self
 exports.prepare = function prepare(entry, opts) {
   if (startsWithWindowsDriveLetter(entry)) entry = '/' + entry
 
-  entry = new URL(entry, pathToFileURL('./'))
+  let base = pathToFileURL('./')
+
+  // If `bare-thread` itself was loaded from within a bundle, its module URL
+  // contains a `.bundle` segment. When the entry resolves to a location inside
+  // that same bundle, prepare it relative to the bundle so that its sources are
+  // read back out of the bundle rather than from disk.
+  const root = bundleURL(module.url)
+
+  if (root !== null) {
+    const resolved = new URL(entry, root)
+
+    if (resolved.href.startsWith(root.href)) base = root
+  }
+
+  entry = new URL(entry, base)
 
   const bundle = new Bundle()
 
@@ -111,6 +125,20 @@ function readModule(url) {
   if (protocol.exists(url)) return protocol.read(url)
 
   return null
+}
+
+function bundleURL(url) {
+  const segments = url.pathname.split('/')
+
+  let i = -1
+
+  for (let j = 0; j < segments.length; j++) {
+    if (segments[j].endsWith('.bundle')) i = j
+  }
+
+  if (i === -1) return null
+
+  return new URL(segments.slice(0, i + 1).join('/') + '/', url)
 }
 
 exports.constants = constants
