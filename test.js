@@ -26,25 +26,17 @@ test('Thread.cpu', (t) => {
 })
 
 test('name property', (t) => {
-  const thread = new Thread(require.resolve('./test/fixtures/basic/index.js'))
+  Thread.name = 'bare-test'
 
-  thread.name = 'bare-test'
-
-  t.is(thread.name, 'bare-test')
-
-  thread.join()
+  t.is(Thread.name, 'bare-test')
 })
 
 test('priority', (t) => {
-  const thread = new Thread(require.resolve('./test/fixtures/basic/index.js'))
+  const defaultPriority = Thread.priority
 
-  const defaultPriority = thread.priority
+  Thread.priority = Thread.constants.priority.PRIORITY_BELOW_NORMAL
 
-  thread.priority = Thread.constants.priority.PRIORITY_BELOW_NORMAL
-
-  t.ok(thread.priority !== defaultPriority)
-
-  thread.join()
+  t.ok(Thread.priority !== defaultPriority)
 })
 
 test('Thread.id', (t) => {

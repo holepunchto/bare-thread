@@ -21,24 +21,6 @@ module.exports = exports = class Thread {
     return this._thread.joined
   }
 
-  get name() {
-    return binding.getName()
-  }
-
-  set name(name) {
-    if (typeof name !== 'string') name = name.toString()
-
-    binding.setName(name)
-  }
-
-  get priority() {
-    return binding.getPriority()
-  }
-
-  set priority(priority) {
-    binding.setPriority(priority)
-  }
-
   join() {
     this._thread.join()
   }
@@ -73,6 +55,24 @@ module.exports = exports = class Thread {
 
   static get id() {
     return binding.getID()
+  }
+
+  static get name() {
+    return binding.getName()
+  }
+
+  static set name(name) {
+    if (typeof name !== 'string') name = name.toString()
+
+    binding.setName(name)
+  }
+
+  static get priority() {
+    return binding.getPriority()
+  }
+
+  static set priority(priority) {
+    binding.setPriority(priority)
   }
 }
 
