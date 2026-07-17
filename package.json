@@ -4,10 +4,14 @@
   "description": "Thread support for Bare",
   "exports": {
     "./package": "./package.json",
-    ".": "./index.js"
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    }
   },
   "files": [
     "index.js",
+    "index.d.ts",
     "binding.c",
     "binding.js",
     "CMakeLists.txt",
@@ -37,10 +41,19 @@
     "bare-url": "^2.4.2"
   },
   "devDependencies": {
+    "bare-buffer": "^3.6.2",
     "brittle": "^3.3.2",
     "cmake-bare": "^1.7.6",
     "lunte": "^1.6.0",
     "prettier": "^3.4.2",
     "prettier-config-holepunch": "^2.0.0"
+  },
+  "peerDependencies": {
+    "bare-buffer": "*"
+  },
+  "peerDependenciesMeta": {
+    "bare-buffer": {
+      "optional": true
+    }
   }
 }
