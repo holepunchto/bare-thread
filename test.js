@@ -8,6 +8,15 @@ test('basic', (t) => {
   t.pass()
 })
 
+test('joined', (t) => {
+  t.plan(2)
+
+  const thread = new Thread(require.resolve('./test/fixtures/basic/index.js'))
+  t.is(thread.joined, false)
+  thread.join()
+  t.is(thread.joined, true)
+})
+
 test('nested', (t) => {
   const thread = new Thread(require.resolve('./test/fixtures/nested/a.js'))
   thread.join()
