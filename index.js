@@ -5,7 +5,7 @@ const { pathToFileURL } = require('bare-url')
 const constants = require('./lib/constants')
 const binding = require('./binding')
 
-const { protocol, imports, resolutions } = module
+const { protocol } = module
 
 module.exports = exports = class Thread {
   constructor(entry, opts = {}) {
@@ -101,15 +101,7 @@ exports.prepare = function prepare(entry, opts) {
 
   const bundle = new Bundle()
 
-  for (const dependency of traverse(
-    entry,
-    {
-      imports,
-      resolutions,
-      resolve: traverse.resolve.bare
-    },
-    readModule
-  )) {
+  for (const dependency of traverse(entry, { resolve: traverse.resolve.bare }, readModule)) {
     const { url, source, imports } = dependency
 
     bundle.write(url.href, source, {

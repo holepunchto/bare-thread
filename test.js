@@ -51,3 +51,16 @@ test('priority', (t) => {
 test('Thread.id', (t) => {
   t.comment(Thread.id)
 })
+
+test('deferred require of a module loaded in this thread', (t) => {
+  // Loading the module here records the specifiers it resolves on the way in,
+  // but not the one behind its deferred `require()`. The thread must still be
+  // given a bundle that holds it.
+  t.is(require('./test/fixtures/deferred/lib').eager, 'eager')
+
+  const data = new SharedArrayBuffer(4)
+  const thread = new Thread(require.resolve('./test/fixtures/deferred/index.js'), { data })
+  thread.join()
+
+  t.is(new Int32Array(data)[0], 1)
+})
