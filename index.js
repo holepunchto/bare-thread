@@ -14,7 +14,7 @@ module.exports = exports = class Thread {
     if (Buffer.isBuffer(entry)) source = entry
     else source = Thread.prepare(entry, { shared: true })
 
-    this._thread = new Bare.Thread('bare:/thread.bundle', { ...opts, source })
+    this._thread = new Bare.Thread('bare:/thread.bundle', source, opts)
   }
 
   get joined() {
