@@ -7,9 +7,7 @@ const binding = require('./binding')
 
 const PROTOCOL_KIND = Symbol.for('bare.module.protocol.kind')
 
-const { protocol } = module
-
-const readModule = readerFor(protocol)
+const readModule = readerFor(module.protocol)
 
 module.exports = exports = class Thread {
   constructor(entry, opts = {}) {
