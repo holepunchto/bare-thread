@@ -5,7 +5,11 @@ const { pathToFileURL } = require('bare-url')
 const constants = require('./lib/constants')
 const binding = require('./binding')
 
+const PROTOCOL_KIND = Symbol.for('bare.module.protocol.kind')
+
 const { protocol } = module
+
+const readModule = readerFor(protocol)
 
 module.exports = exports = class Thread {
   constructor(entry, opts = {}) {
@@ -113,10 +117,22 @@ exports.prepare = function prepare(entry, opts) {
   return bundle.toBuffer(opts)
 }
 
-function readModule(url) {
-  if (protocol.exists(url)) return protocol.read(url)
+function readerFor(protocol) {
+  const version = protocol[PROTOCOL_KIND]
 
-  return null
+  if (version === undefined) {
+    return function readModule(url) {
+      return protocol.exists(url) ? protocol.read(url) : null
+    }
+  }
+
+  if (version === 0) {
+    return function readModule(url) {
+      return protocol.existsSync(url) ? protocol.readSync(url) : null
+    }
+  }
+
+  throw new Error(`Module protocol of version ${version} is not supported`)
 }
 
 function bundleURL(url) {
