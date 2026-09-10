@@ -118,12 +118,6 @@ exports.prepare = function prepare(entry, opts) {
 function readerFor(protocol) {
   const version = protocol[PROTOCOL_KIND]
 
-  if (version === undefined) {
-    return function readModule(url) {
-      return protocol.exists(url) ? protocol.read(url) : null
-    }
-  }
-
   if (version === 0) {
     return function readModule(url) {
       return protocol.existsSync(url) ? protocol.readSync(url) : null
