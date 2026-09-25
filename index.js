@@ -103,7 +103,11 @@ exports.prepare = function prepare(entry, opts) {
 
   const bundle = new Bundle()
 
-  for (const dependency of traverse(entry, { resolve: traverse.resolve.bare }, readModule)) {
+  for (const dependency of traverse(
+    entry,
+    { resolutions: module.resolutions, resolve: traverse.resolve.bare },
+    readModule
+  )) {
     const { url, source, imports } = dependency
 
     bundle.write(url.href, source, {
