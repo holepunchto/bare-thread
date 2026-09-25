@@ -69,6 +69,71 @@ test('deferred require of a module loaded in this thread', (t) => {
   t.is(new Int32Array(data)[0], 1)
 })
 
+test('Thread.prepare() lists addons', (t) => {
+  const bundle = Bundle.from(Thread.prepare(require.resolve('./test/fixtures/nested/a.js')))
+
+  t.ok(bundle.addons.includes(pathToFileURL(require.addon.resolve('.')).href))
+})
+
+test('Thread.prepare() lists no addons for a graph without any', (t) => {
+  const bundle = Bundle.from(Thread.prepare(require.resolve('./test/fixtures/basic/index.js')))
+
+  t.alike(bundle.addons, [])
+})
+
+test('Thread.prepare() lists assets', (t) => {
+  const bundle = Bundle.from(Thread.prepare(require.resolve('./test/fixtures/asset/index.js')))
+
+  t.alike(bundle.assets, [pathToFileURL(require.asset('./test/fixtures/asset/asset.md')).href])
+})
+
+test('asset import', (t) => {
+  const data = new SharedArrayBuffer(4)
+  const thread = new Thread(require.resolve('./test/fixtures/asset/index.js'), { data })
+  thread.join()
+
+  t.is(new Int32Array(data)[0], 1)
+})
+
+test('asset import of a module loaded in this thread', (t) => {
+  t.ok(require('./test/fixtures/asset/lib')().endsWith('asset.md'))
+
+  const data = new SharedArrayBuffer(4)
+  const thread = new Thread(require.resolve('./test/fixtures/asset/index.js'), { data })
+  thread.join()
+
+  t.is(new Int32Array(data)[0], 1)
+})
+
+test('Thread.prepare() lists the assets of an asset directory', (t) => {
+  const bundle = Bundle.from(
+    Thread.prepare(require.resolve('./test/fixtures/asset-directory/index.js'))
+  )
+
+  t.alike(bundle.assets, [
+    pathToFileURL(require.asset('./test/fixtures/asset-directory/dir/a.md')).href,
+    pathToFileURL(require.asset('./test/fixtures/asset-directory/dir/nested/b.md')).href
+  ])
+})
+
+test('asset directory import', (t) => {
+  const data = new SharedArrayBuffer(4)
+  const thread = new Thread(require.resolve('./test/fixtures/asset-directory/index.js'), { data })
+  thread.join()
+
+  t.is(new Int32Array(data)[0], 1)
+})
+
+test('asset directory import of a module loaded in this thread', (t) => {
+  t.ok(require('./test/fixtures/asset-directory/lib')().endsWith('dir'))
+
+  const data = new SharedArrayBuffer(4)
+  const thread = new Thread(require.resolve('./test/fixtures/asset-directory/index.js'), { data })
+  thread.join()
+
+  t.is(new Int32Array(data)[0], 1)
+})
+
 test('bundled thread', async (t) => {
   const run = await loadBundle(t, {
     '/worker.js': "new Int32Array(Bare.Thread.self.data)[0] = require('./dep')",
