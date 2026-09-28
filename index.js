@@ -8,6 +8,7 @@ const binding = require('./binding')
 const PROTOCOL_KIND = Symbol.for('bare.module.protocol.kind')
 
 const readModule = readerFor(module.protocol)
+const listPrefix = listerFor(module.protocol)
 
 module.exports = exports = class Thread {
   constructor(entry, opts = {}) {
@@ -103,14 +104,28 @@ exports.prepare = function prepare(entry, opts) {
 
   const bundle = new Bundle()
 
-  for (const dependency of traverse(entry, { resolve: traverse.resolve.bare }, readModule)) {
-    const { url, source, imports } = dependency
+  const dependencies = traverse(
+    entry,
+    { resolutions: module.resolutions, resolve: traverse.resolve.bare },
+    readModule,
+    listPrefix
+  )[Symbol.iterator]()
+
+  let next = dependencies.next()
+
+  while (next.done !== true) {
+    const { url, source, imports } = next.value
 
     bundle.write(url.href, source, {
       main: url.href === entry.href,
       imports
     })
+
+    next = dependencies.next()
   }
+
+  bundle.addons = next.value.addons.map((url) => url.href)
+  bundle.assets = next.value.assets.map((url) => url.href)
 
   return bundle.toBuffer(opts)
 }
@@ -125,6 +140,22 @@ function readerFor(protocol) {
   }
 
   throw new Error(`Module protocol of version ${version} is not supported`)
+}
+
+function listerFor(protocol) {
+  const version = protocol[PROTOCOL_KIND]
+
+  if (version === undefined) {
+    if (typeof protocol.list !== 'function') return null
+
+    return function listPrefix(url) {
+      return protocol.list(url)
+    }
+  }
+
+  return function listPrefix(url) {
+    return protocol.listSync(url)
+  }
 }
 
 function bundleURL(url) {
