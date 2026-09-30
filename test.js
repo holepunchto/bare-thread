@@ -134,6 +134,58 @@ test('asset directory import of a module loaded in this thread', (t) => {
   t.is(new Int32Array(data)[0], 1)
 })
 
+test('imports attribute', (t) => {
+  const data = new SharedArrayBuffer(4)
+  const thread = new Thread(
+    require.resolve('./test/fixtures/imports/index.js', {
+      with: { imports: './test/fixtures/imports/imports.json' }
+    }),
+    { data }
+  )
+  thread.join()
+
+  t.is(new Int32Array(data)[0], 1)
+})
+
+test('imports attribute with base URL', (t) => {
+  const data = new SharedArrayBuffer(4)
+  const thread = new Thread(
+    require.resolve('./test/fixtures/imports/base.js', __filename, {
+      with: { imports: './test/fixtures/imports/imports.json' }
+    }),
+    { data }
+  )
+  thread.join()
+
+  t.is(new Int32Array(data)[0], 1)
+})
+
+test('imports attribute with computed specifier', (t) => {
+  const specifier = './test/fixtures/imports/' + 'computed.js'
+
+  const data = new SharedArrayBuffer(4)
+  const thread = new Thread(
+    require.resolve(specifier, { with: { imports: './test/fixtures/imports/imports.json' } }),
+    { data }
+  )
+  thread.join()
+
+  t.is(new Int32Array(data)[0], 1)
+})
+
+test('Thread.prepare() applies the imports attribute', (t) => {
+  const entry = require.resolve('./test/fixtures/imports/index.js', {
+    with: { imports: './test/fixtures/imports/imports.json' }
+  })
+
+  const bundle = Bundle.from(Thread.prepare(entry))
+
+  t.is(
+    bundle.resolutions[pathToFileURL(entry).href].dep,
+    pathToFileURL(require.resolve('./test/fixtures/imports/dep.js')).href
+  )
+})
+
 test('bundled thread', async (t) => {
   const run = await loadBundle(t, {
     '/worker.js': "new Int32Array(Bare.Thread.self.data)[0] = require('./dep')",
@@ -192,10 +244,20 @@ test('bundled thread, import redirected in a dependency', async (t) => {
   t.is(run('./worker.js'), 2)
 })
 
+test('bundled thread, imports attribute', async (t) => {
+  const run = await loadBundle(t, {
+    '/worker.js': "new Int32Array(Bare.Thread.self.data)[0] = require('dep')",
+    '/dep.js': 'module.exports = 1',
+    '/imports.json': '{ "dep": "./dep.js" }'
+  })
+
+  t.is(run('./worker.js', { with: { imports: './imports.json' } }), 1)
+})
+
 // Writes a bundle holding the given files and a copy of `bare-thread`, and
 // loads it from disk. The returned function runs one of the files in a thread
-// spawned from within the bundle and returns the value it stored in the thread
-// data.
+// spawned from within the bundle, resolving it with the given options, and
+// returns the value it stored in the thread data.
 async function loadBundle(t, files, resolutions = {}) {
   const dir = await t.tmp()
 
@@ -207,8 +269,8 @@ async function loadBundle(t, files, resolutions = {}) {
       `
       const Thread = require('bare-thread')
 
-      module.exports = function run(entry, data) {
-        new Thread(require.resolve(entry), { data }).join()
+      module.exports = function run(entry, data, opts) {
+        new Thread(require.resolve(entry, opts), { data }).join()
       }
       `,
       { main: true }
@@ -237,9 +299,9 @@ async function loadBundle(t, files, resolutions = {}) {
 
   const run = require(file)
 
-  return function (entry) {
+  return function (entry, opts) {
     const data = new SharedArrayBuffer(4)
-    t.execution(() => run(entry, data))
+    t.execution(() => run(entry, data, opts))
     return new Int32Array(data)[0]
   }
 }
