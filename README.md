@@ -25,6 +25,8 @@ thread.join()
 
 Spawn a new thread. `entry` is either the path to a module entry point, which is resolved and bundled with `Thread.prepare()`, or a `Buffer` containing an already prepared bundle. `options` are forwarded to the underlying `Bare.Thread`.
 
+The bundle is mounted at `options.mount` and serves only the modules under it. When `entry` is a path, the mount defaults to `Thread.mountFor(entry)`. A prepared bundle is keyed by the absolute URLs of its modules, so it must be given a mount that holds them; otherwise, it's mounted at its own URL.
+
 #### `thread.joined`
 
 Whether the thread has been joined.
@@ -78,6 +80,10 @@ A reference to the calling thread.
 Resolve and traverse the module graph rooted at `entry`, returning a `Buffer` containing the bundled sources. `entry` is a path that is resolved relative to the current working directory, unless `bare-thread` itself was loaded from within a bundle and `entry` resolves to a location inside that same bundle, in which case it is resolved and read back out of the bundle. `options` are forwarded to `Bundle.toBuffer()`. See <https://github.com/holepunchto/bare-bundle>.
 
 The constructor calls this internally when given a path, so it only needs to be used directly when a bundle is to be prepared ahead of time or reused across threads.
+
+#### `const mount = Thread.mountFor(entry)`
+
+Get the mount for a bundle prepared from `entry`, which is the root of the URL that `entry` resolves to, such as `file:///` for a path. `entry` is resolved as for `Thread.prepare()`. A bundle only serves the modules it holds, so mounting it at the root lets it serve all of them without reaching any further.
 
 #### `Thread.constants`
 

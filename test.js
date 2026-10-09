@@ -34,6 +34,29 @@ test('from buffer', (t) => {
   t.pass()
 })
 
+test('from buffer with absolute keys', (t) => {
+  const data = new SharedArrayBuffer(4)
+
+  const root = pathToFileURL(path.resolve('/thread') + path.sep)
+
+  const bundle = new Bundle()
+    .write(new URL('index.js', root).href, "require('./lib/dep')", { main: true })
+    .write(new URL('lib/dep.js', root).href, 'new Int32Array(Bare.Thread.self.data)[0] = 1')
+
+  const thread = new Thread(bundle.toBuffer(), { data, mount: root })
+  thread.join()
+
+  t.is(new Int32Array(data)[0], 1)
+})
+
+test('Thread.mountFor()', (t) => {
+  t.is(Thread.mountFor(require.resolve('./test/fixtures/basic/index.js')), 'file:///')
+  t.is(Thread.mountFor(new URL('file:///c:/app/index.js')), 'file:///')
+  t.is(Thread.mountFor(new URL('file://host/share/index.js')), 'file://host/')
+  t.is(Thread.mountFor(new URL('bare:/app.bundle/index.js')), 'bare:/')
+  t.is(Thread.mountFor(new URL('pear://user@key:1/index.js?query#hash')), 'pear://user@key:1/')
+})
+
 test('Thread.cpu', (t) => {
   t.comment(Thread.cpu)
 })
