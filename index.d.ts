@@ -15,8 +15,15 @@ interface Thread {
   terminate(): void
 }
 
+interface ThreadOptions {
+  data?: unknown
+  transfer?: unknown[]
+  stackSize?: number
+  mount?: URL | string
+}
+
 declare class Thread {
-  constructor(entry: Buffer | string)
+  constructor(entry: Buffer | string, opts?: ThreadOptions)
 
   static readonly cpu: number | undefined
 
@@ -34,6 +41,8 @@ declare namespace Thread {
   export const constants: Constants
 
   export function prepare(entry: URL | string, opts: BundleToBufferOptions): Buffer
+
+  export function mountFor(entry: URL | string): string
 }
 
 export = Thread

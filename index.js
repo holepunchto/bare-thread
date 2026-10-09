@@ -1,7 +1,7 @@
 const Bundle = require('bare-bundle')
 const traverse = require('bare-module-traverse')
 const { startsWithWindowsDriveLetter } = require('bare-module-resolve')
-const { pathToFileURL } = require('bare-url')
+const URL = require('bare-url')
 const constants = require('./lib/constants')
 const binding = require('./binding')
 
@@ -14,8 +14,13 @@ module.exports = exports = class Thread {
   constructor(entry, opts = {}) {
     let source
 
-    if (Buffer.isBuffer(entry)) source = entry
-    else source = Thread.prepare(entry, { shared: true })
+    if (Buffer.isBuffer(entry)) {
+      source = entry
+    } else {
+      source = Thread.prepare(entry, { shared: true })
+
+      if (opts.mount === undefined) opts = { ...opts, mount: Thread.mountFor(entry) }
+    }
 
     this._thread = new Bare.Thread('bare:/thread.bundle', source, opts)
   }
@@ -84,23 +89,7 @@ exports.isMainThread = Bare.Thread.isMainThread
 exports.self = Bare.Thread.self
 
 exports.prepare = function prepare(entry, opts) {
-  if (startsWithWindowsDriveLetter(entry)) entry = '/' + entry
-
-  let base = pathToFileURL('./')
-
-  // If `bare-thread` itself was loaded from within a bundle, its module URL
-  // contains a `.bundle` segment. When the entry resolves to a location inside
-  // that same bundle, prepare it relative to the bundle so that its sources are
-  // read back out of the bundle rather than from disk.
-  const root = bundleURL(module.url)
-
-  if (root !== null) {
-    const resolved = new URL(entry, root)
-
-    if (resolved.href.startsWith(root.href)) base = root
-  }
-
-  entry = new URL(entry, base)
+  entry = entryURL(entry)
 
   const bundle = new Bundle()
 
@@ -128,6 +117,32 @@ exports.prepare = function prepare(entry, opts) {
   bundle.assets = next.value.assets.map((url) => url.href)
 
   return bundle.toBuffer(opts)
+}
+
+exports.mountFor = function mountFor(entry) {
+  const { href, pathname, search, hash } = entryURL(entry)
+
+  return href.slice(0, href.length - pathname.length - search.length - hash.length) + '/'
+}
+
+function entryURL(entry) {
+  if (startsWithWindowsDriveLetter(entry)) entry = '/' + entry
+
+  let base = URL.pathToFileURL('./')
+
+  // If `bare-thread` itself was loaded from within a bundle, its module URL
+  // contains a `.bundle` segment. When the entry resolves to a location inside
+  // that same bundle, prepare it relative to the bundle so that its sources are
+  // read back out of the bundle rather than from disk.
+  const root = bundleURL(module.url)
+
+  if (root !== null) {
+    const resolved = new URL(entry, root)
+
+    if (resolved.href.startsWith(root.href)) base = root
+  }
+
+  return new URL(entry, base)
 }
 
 function readerFor(protocol) {
