@@ -37,11 +37,13 @@ test('from buffer', (t) => {
 test('from buffer with absolute keys', (t) => {
   const data = new SharedArrayBuffer(4)
 
-  const bundle = new Bundle()
-    .write('file:///thread/index.js', "require('./lib/dep')", { main: true })
-    .write('file:///thread/lib/dep.js', 'new Int32Array(Bare.Thread.self.data)[0] = 1')
+  const root = pathToFileURL(path.resolve('/thread') + path.sep)
 
-  const thread = new Thread(bundle.toBuffer(), { data, mount: 'file:///thread/' })
+  const bundle = new Bundle()
+    .write(new URL('index.js', root).href, "require('./lib/dep')", { main: true })
+    .write(new URL('lib/dep.js', root).href, 'new Int32Array(Bare.Thread.self.data)[0] = 1')
+
+  const thread = new Thread(bundle.toBuffer(), { data, mount: root })
   thread.join()
 
   t.is(new Int32Array(data)[0], 1)
