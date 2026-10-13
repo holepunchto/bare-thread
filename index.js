@@ -9,6 +9,7 @@ const PROTOCOL_KIND = Symbol.for('bare.module.protocol.kind')
 
 const readModule = readerFor(module.protocol)
 const listPrefix = listerFor(module.protocol)
+const probeModule = proberFor(module.protocol)
 
 module.exports = exports = class Thread {
   constructor(entry, opts = {}) {
@@ -97,18 +98,22 @@ exports.prepare = function prepare(entry, opts) {
     entry,
     { resolutions: module.resolutions, resolve: traverse.resolve.bare },
     readModule,
-    listPrefix
+    listPrefix,
+    probeModule
   )[Symbol.iterator]()
 
   let next = dependencies.next()
 
   while (next.done !== true) {
-    const { url, source, imports } = next.value
+    const { url, source, type, imports } = next.value
 
-    bundle.write(url.href, source, {
-      main: url.href === entry.href,
-      imports
-    })
+    // Native addons are loaded from disk, so embedding them is dead weight.
+    if (type !== traverse.constants.ADDON || isWebAssembly(url)) {
+      bundle.write(url.href, source, {
+        main: url.href === entry.href,
+        imports
+      })
+    }
 
     next = dependencies.next()
   }
@@ -160,17 +165,25 @@ function readerFor(protocol) {
 function listerFor(protocol) {
   const version = protocol[PROTOCOL_KIND]
 
-  if (version === undefined) {
-    if (typeof protocol.list !== 'function') return null
-
+  if (version === 0) {
     return function listPrefix(url) {
-      return protocol.list(url)
+      return protocol.listSync(url)
     }
   }
 
-  return function listPrefix(url) {
-    return protocol.listSync(url)
+  throw new Error(`Module protocol of version ${version} is not supported`)
+}
+
+function proberFor(protocol) {
+  const version = protocol[PROTOCOL_KIND]
+
+  if (version === 0) {
+    return function probeModule(url) {
+      return protocol.existsSync(url)
+    }
   }
+
+  throw new Error(`Module protocol of version ${version} is not supported`)
 }
 
 function bundleURL(url) {
@@ -185,6 +198,10 @@ function bundleURL(url) {
   if (i === -1) return null
 
   return new URL(segments.slice(0, i + 1).join('/') + '/', url)
+}
+
+function isWebAssembly(url) {
+  return url.pathname.endsWith('.wasm')
 }
 
 exports.constants = constants
