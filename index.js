@@ -162,6 +162,18 @@ function readerFor(protocol) {
   throw new Error(`Module protocol of version ${version} is not supported`)
 }
 
+function listerFor(protocol) {
+  const version = protocol[PROTOCOL_KIND]
+
+  if (version === 0) {
+    return function listPrefix(url) {
+      return protocol.listSync(url)
+    }
+  }
+
+  throw new Error(`Module protocol of version ${version} is not supported`)
+}
+
 function proberFor(protocol) {
   const version = protocol[PROTOCOL_KIND]
 
@@ -172,22 +184,6 @@ function proberFor(protocol) {
   }
 
   throw new Error(`Module protocol of version ${version} is not supported`)
-}
-
-function listerFor(protocol) {
-  const version = protocol[PROTOCOL_KIND]
-
-  if (version === undefined) {
-    if (typeof protocol.list !== 'function') return null
-
-    return function listPrefix(url) {
-      return protocol.list(url)
-    }
-  }
-
-  return function listPrefix(url) {
-    return protocol.listSync(url)
-  }
 }
 
 function bundleURL(url) {
